@@ -1,0 +1,267 @@
+@model MeridianTravel.Models.HomeViewModel
+@{
+    ViewData["Title"] = "Bespoke Travel Architecture";
+}
+
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container py-lg-4">
+        <div class="row g-5 align-items-stretch">
+            <div class="col-lg-6 d-flex flex-column justify-content-between">
+                <div>
+                    <p class="hero-stagger small text-muted mb-3">Zurich · London · Private Travel Architecture</p>
+                    <h1 class="hero-stagger display-hero mb-4">
+                        Quiet journeys engineered with architectural precision.
+                    </h1>
+                    <p class="hero-stagger text-muted fs-6 mb-4" style="max-width: 520px;">
+                        We design private aviation routes, off-market villa stays, and cultural expeditions for travelers who value stillness over spectacle.
+                    </p>
+                </div>
+                <div class="hero-stagger d-flex flex-wrap align-items-center gap-4 mt-4">
+                    <a href="#inquire" class="btn btn-obsidian btn-lg magnetic-btn d-inline-flex align-items-center gap-2">
+                        <span>Begin an Itinerary</span>
+                        <i data-lucide="arrow-up-right" style="width:18px;height:18px;color:#C7F000;"></i>
+                    </a>
+                    <a href="#destinations" class="editorial-link">Explore 2026–27 Destinations</a>
+                </div>
+            </div>
+
+            <div class="col-lg-6 position-relative">
+                <div class="hero-stagger hero-image-frame h-100">
+                    <img src="~/images/hero_amalfi_villa.jpg" alt="Amalfi Coast cliffside villa" class="hero-parallax-img w-100 h-100 object-fit-cover" />
+                    <div class="hero-image-caption d-flex justify-content-between align-items-center">
+                        <span>Amalfi Coast · Private Cliffside Residence</span>
+                        <span class="font-mono text-lime">40.6333° N, 14.6029° E</span>
+                    </div>
+                </div>
+                <div id="orbitalCanvas" class="orbital-widget d-none d-xl-block" aria-hidden="true"></div>
+            </div>
+        </div>
+
+        <!-- Interactive Flight Desk Inquiry Form -->
+        <div class="hero-stagger card-ivory-panel mt-5 p-4 p-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 border-bottom">
+                <div>
+                    <h2 class="h5 fw-semibold mb-1">Flight Desk Inquiry</h2>
+                    <p class="small text-muted mb-0">Commercial first/business routing and private charter quotes prepared by our aviation advisors.</p>
+                </div>
+            </div>
+
+            <form asp-action="SubmitFlightInquiry" asp-controller="Home" method="post" class="mt-4">
+                @Html.AntiForgeryToken()
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label asp-for="FlightInquiry.TripType" class="form-label small text-muted">Trip Type</label>
+                        <select asp-for="FlightInquiry.TripType" class="form-select meridian-input">
+                            <option value="Round-Trip">Round-Trip</option>
+                            <option value="One-Way">One-Way</option>
+                            <option value="Multi-City">Multi-City</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="FlightInquiry.Origin" class="form-label small text-muted">From</label>
+                        <input asp-for="FlightInquiry.Origin" class="form-control meridian-input" placeholder="LHR — London Heathrow" />
+                        <span asp-validation-for="FlightInquiry.Origin" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="FlightInquiry.Destination" class="form-label small text-muted">To</label>
+                        <input asp-for="FlightInquiry.Destination" class="form-control meridian-input" placeholder="HND — Tokyo Haneda" />
+                        <span asp-validation-for="FlightInquiry.Destination" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="FlightInquiry.DepartureDate" class="form-label small text-muted">Departure</label>
+                        <input asp-for="FlightInquiry.DepartureDate" type="date" class="form-control meridian-input tabular-nums" />
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="FlightInquiry.ReturnDate" class="form-label small text-muted">Return</label>
+                        <input asp-for="FlightInquiry.ReturnDate" type="date" class="form-control meridian-input tabular-nums" />
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-4">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <label asp-for="FlightInquiry.Passengers" class="small text-muted mb-0">Travelers</label>
+                            <input asp-for="FlightInquiry.Passengers" type="number" min="1" max="16" class="form-control meridian-input tabular-nums" style="width: 80px;" />
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label asp-for="FlightInquiry.CabinClass" class="small text-muted mb-0">Cabin</label>
+                            <select asp-for="FlightInquiry.CabinClass" class="form-select meridian-input" style="width: 170px;">
+                                <option value="Business">Business</option>
+                                <option value="First">First</option>
+                                <option value="Private Charter">Private Charter</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-lime magnetic-btn px-4 py-2 fw-semibold">
+                        Request Flight Options
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.FlightStatusMessage))
+                {
+                    <div class="alert alert-dark mt-4 mb-0 d-flex align-items-center gap-2 small">
+                        <i data-lucide="check-circle-2" style="width:18px;height:18px;color:#C7F000;"></i>
+                        <span>@Model.FlightStatusMessage</span>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Dark Bento Grid Destination Showcase -->
+<section id="destinations" class="bg-obsidian text-white py-5">
+    <div class="container py-5">
+        <div class="row align-items-end mb-5 reveal-section">
+            <div class="col-lg-8">
+                <p class="small text-lime mb-2">Curated Geography</p>
+                <h2 class="display-section text-white">Destinations selected for architectural stillness and rare access.</h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var dest in Model.Destinations)
+            {
+                <div class="@(dest.IsWideCard ? "col-lg-8" : "col-lg-4")">
+                    <article class="bento-card h-100" data-destination="@dest.Name, @dest.Country">
+                        <img src="@dest.ImagePath" alt="@dest.Name, @dest.Country" class="bento-card-img" />
+                        <div class="bento-card-scrim"></div>
+                        <div class="bento-card-content d-flex flex-column justify-content-between h-100">
+                            <div class="d-flex justify-content-between small text-white-50">
+                                <span>@dest.Country · @dest.Duration</span>
+                                <span class="font-mono text-lime">@dest.StartingRate</span>
+                            </div>
+                            <div class="mt-auto pt-5">
+                                <h3 class="h3 text-white mb-2">@dest.Name</h3>
+                                <p class="small text-white-50 mb-3">@dest.Summary</p>
+                                <button type="button" class="btn btn-sm btn-outline-light select-dest-btn" data-dest="@dest.Name, @dest.Country">
+                                    Inquire About Route
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-4 reveal-section">
+                <p class="small text-muted mb-2">Capabilities</p>
+                <h2 class="display-section mb-3">Every leg of the journey, handled by one desk.</h2>
+                <p class="text-muted small">One senior advisor designs, books, and monitors your itinerary from departure to return.</p>
+            </div>
+            <div class="col-lg-8">
+                @foreach (var svc in Model.Services)
+                {
+                    <div class="service-row reveal-section py-4 border-top">
+                        <div class="row">
+                            <div class="col-md-2 font-mono text-muted small">@svc.Number</div>
+                            <div class="col-md-10">
+                                <h3 class="h4 mb-2">@svc.Title</h3>
+                                <p class="text-muted small mb-2">@svc.Description</p>
+                                <p class="small mb-0"><strong>Included:</strong> @svc.Deliverable</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us & Testimonials -->
+<section id="approach" class="bg-white border-top border-bottom py-5">
+    <div class="container py-5">
+        <div class="mb-5 reveal-section">
+            <p class="small text-muted mb-2">Why Meridian</p>
+            <h2 class="display-section">Measured execution when schedules shift.</h2>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4 reveal-section">
+                <div class="metric-card p-4">
+                    <p class="display-6 fw-semibold tabular-nums mb-2">14 min</p>
+                    <p class="fw-semibold small mb-1">Median Response Time</p>
+                    <p class="small text-muted mb-0">Direct WhatsApp & flight desk resolution during active travel.</p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-section">
+                <div class="metric-card p-4">
+                    <p class="display-6 fw-semibold tabular-nums mb-2">42</p>
+                    <p class="fw-semibold small mb-1">Partner Countries</p>
+                    <p class="small text-muted mb-0">Vetted architectural stays and private aviation operators.</p>
+                </div>
+            </div>
+            <div class="col-md-4 reveal-section">
+                <div class="metric-card p-4">
+                    <p class="display-6 fw-semibold tabular-nums mb-2">96%</p>
+                    <p class="fw-semibold small mb-1">Returning Travelers</p>
+                    <p class="small text-muted mb-0">Clients booking two or more bespoke itineraries within 24 months.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Custom Trip Inquiry Section -->
+<section id="inquire" class="py-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-5 reveal-section">
+                <p class="small text-muted mb-2">Private Consultation</p>
+                <h2 class="display-section mb-3">Share your dates and pace. We will draft the first route within 24 hours.</h2>
+                <p class="small text-muted mb-4">Every inquiry is reviewed directly by a senior travel architect in Zurich or London.</p>
+            </div>
+            <div class="col-lg-7 reveal-section">
+                <div class="card-ivory-panel p-4 p-md-5">
+                    <form asp-action="SubmitTripInquiry" asp-controller="Home" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label asp-for="TripInquiry.FullName" class="form-label small text-muted">Full Name</label>
+                                <input asp-for="TripInquiry.FullName" class="form-control meridian-input" placeholder="Elena Rostova" />
+                                <span asp-validation-for="TripInquiry.FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="TripInquiry.Email" class="form-label small text-muted">Email Address</label>
+                                <input asp-for="TripInquiry.Email" class="form-control meridian-input" placeholder="elena@studio.ch" />
+                                <span asp-validation-for="TripInquiry.Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="TripInquiry.Destination" class="form-label small text-muted">Destination</label>
+                                <input asp-for="TripInquiry.Destination" id="tripDestinationInput" class="form-control meridian-input" />
+                                <span asp-validation-for="TripInquiry.Destination" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="TripInquiry.TravelWindow" class="form-label small text-muted">Preferred Window</label>
+                                <input asp-for="TripInquiry.TravelWindow" class="form-control meridian-input" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="TripInquiry.Notes" class="form-label small text-muted">Itinerary Notes</label>
+                                <textarea asp-for="TripInquiry.Notes" rows="4" class="form-control meridian-input"></textarea>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button type="submit" class="btn btn-lime magnetic-btn px-4 py-2 fw-semibold">
+                                    Send Custom Trip Brief
+                                </button>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.TripStatusMessage))
+                        {
+                            <div class="alert alert-dark mt-4 mb-0 small">
+                                @Model.TripStatusMessage
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

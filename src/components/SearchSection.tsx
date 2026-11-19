@@ -35,7 +35,7 @@ export function SearchSection({
   onBookNow,
 }: SearchSectionProps) {
   const [locationQuery, setLocationQuery] = useState('');
-  const [maxPrice, setMaxPrice] = useState<number>(600);
+  const [maxPrice, setMaxPrice] = useState<number>(60000);
   const [selectedDate, setSelectedDate] = useState('2026-12-15');
   const [minQuality, setMinQuality] = useState<number>(0);
 
@@ -112,7 +112,7 @@ export function SearchSection({
                   type="text"
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
-                  placeholder="Kyoto, Amalfi, Patagonia, Iceland..."
+                  placeholder="Hunza, Skardu, Swat, Lahore, Islamabad..."
                   className="w-full pl-10 pr-3 py-2.5 text-sm bg-[#F5F2EA]/60 border border-[#D9D7D0] rounded-xl focus:outline-none focus:border-[#111111]"
                 />
               </div>
@@ -136,14 +136,14 @@ export function SearchSection({
 
             <div className="md:col-span-3">
               <label htmlFor="filter-price" className="block text-xs font-medium text-[#111111]/70 mb-1.5">
-                Max Price: <span className="font-mono font-semibold text-[#111111]">${maxPrice}</span>
+                Max Price: <span className="font-mono font-semibold text-[#111111]">Rs. {maxPrice.toLocaleString()}</span>
               </label>
               <input
                 id="filter-price"
                 type="range"
-                min={50}
-                max={600}
-                step={25}
+                min={3000}
+                max={60000}
+                step={1000}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="w-full accent-[#111111] cursor-pointer"
@@ -226,8 +226,8 @@ export function SearchSection({
 
                   <div className="mt-6 pt-4 border-t border-[#D9D7D0] flex items-center justify-between gap-4">
                     <div>
-                      <p className="font-display text-2xl font-semibold tabular-nums text-[#111111]">
-                        ${item.price}
+                      <p className="font-display text-xl font-semibold tabular-nums text-[#111111]">
+                        Rs. {item.price.toLocaleString()}
                       </p>
                       <p className="text-xs text-[#111111]/55">{item.priceUnit}</p>
                     </div>

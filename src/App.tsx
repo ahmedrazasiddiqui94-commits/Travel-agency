@@ -1,4 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 import {
   ArrowLeft,
   ArrowRight,
@@ -25,6 +29,9 @@ import { InfoSection } from './components/InfoSection';
 import { CustomerDashboard } from './components/CustomerDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { OrbitalCanvas } from './components/OrbitalCanvas';
+import { AirplaneFlightPath } from './components/AirplaneFlightPath';
+import { KarnelLogo } from './components/KarnelLogo';
+import { CustomCursor } from './components/CustomCursor';
 
 const DEFAULT_CUSTOMER: UserAccount = {
   name: 'Amina Khan',
@@ -45,6 +52,8 @@ const DEFAULT_ADMIN: UserAccount = {
 };
 
 export default function App() {
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const bannerParallaxRef = useRef<HTMLDivElement>(null);
   const [route, setRoute] = useState<PageRoute>({ page: 'home' });
   const [bannerIndex, setBannerIndex] = useState(0);
   const [reviewIndex, setReviewIndex] = useState(0);
@@ -96,6 +105,33 @@ export default function App() {
     }, 6000);
     return () => clearInterval(timer);
   }, []);
+
+  // Scroll-based GSAP parallax zoom on hero banner image
+  useEffect(() => {
+    if (route.page !== 'home') return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !heroSectionRef.current || !bannerParallaxRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        bannerParallaxRef.current,
+        { scale: 1.04, yPercent: 0 },
+        {
+          scale: 1.16,
+          yPercent: 10,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroSectionRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
+          },
+        }
+      );
+    }, heroSectionRef);
+
+    return () => ctx.revert();
+  }, [route.page]);
 
   const handleBookNow = (itemId: string) => {
     setBookSuccessId(null);
@@ -200,97 +236,138 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F5F2EA] text-[#111111] flex flex-col">
+      <CustomCursor />
       <Navbar route={route} onNavigate={setRoute} currentUser={currentUser} />
 
       <main className="flex-1">
         {/* HOME PAGE */}
         {route.page === 'home' && (
           <>
-            {/* 1. Banner Section with Image Slider & 3D Floating Sculpture */}
-            <section className="py-12 md:py-16">
-              <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-                  <div className="lg:col-span-6 flex flex-col justify-between">
-                    <div>
-                      <p className="text-xs font-mono text-[#111111]/60 mb-4">
-                        {currentSlide.kicker}
-                      </p>
-                      <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-semibold leading-[1.05] tracking-tight text-balance">
-                        {currentSlide.title}
-                      </h1>
-                      <p className="mt-5 text-base text-[#111111]/70 max-w-xl leading-relaxed">
-                        {currentSlide.subtitle}
-                      </p>
-                      <p className="mt-4 text-xs font-semibold text-[#111111]">
-                        Current Offer: <span className="bg-[#C7F000] px-2 py-0.5">{currentSlide.offer}</span>
-                      </p>
-                    </div>
+            {/* 1. Full-Bleed Background Banner Section with Slider, Parallax Zoom & Grain */}
+            <section
+              ref={heroSectionRef}
+              className="relative -mt-20 pt-32 pb-16 md:pt-40 md:pb-24 min-h-[600px] lg:min-h-[680px] flex items-end overflow-hidden bg-[#111111] text-white"
+            >
+              {/* Full-Bleed Background Image Layer with GSAP Scroll Parallax Zoom */}
+              <div
+                ref={bannerParallaxRef}
+                className="group absolute inset-0 w-full h-full will-change-transform"
+              >
+                {BANNER_SLIDES.map((slide, idx) => {
+                  const isActive = idx === bannerIndex;
+                  return (
+                    <img
+                      key={slide.id}
+                      src={slide.image}
+                      alt={slide.title}
+                      referrerPolicy="no-referrer"
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1400ms] ease-out ${
+                        isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
 
-                    <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-                      <div className="flex flex-wrap items-center gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setRoute({ page: 'search', category: 'hotels' })}
-                          className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#111111] text-white text-sm font-semibold border border-[#111111] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#C7F000] transition-all cursor-pointer"
-                        >
-                          <span>Explore & Book</span>
-                          <ArrowUpRight className="w-4 h-4 text-[#C7F000]" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRoute({ page: 'info', topic: 'travel-info' })}
-                          className="text-sm font-medium underline underline-offset-4 cursor-pointer"
-                        >
-                          Travel Information
-                        </button>
-                      </div>
+              {/* Editorial Grain + Measured Contrast Scrim */}
+              <div className="editorial-grain absolute inset-0 pointer-events-none z-[5]" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25 pointer-events-none z-[6]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none z-[6]" />
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          aria-label="Previous slide"
-                          onClick={() =>
-                            setBannerIndex((i) => (i - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length)
-                          }
-                          className="w-10 h-10 rounded-xl border-[1.5px] border-[#111111] bg-white hover:bg-[#C7F000] flex items-center justify-center cursor-pointer"
-                        >
-                          <ArrowLeft className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Next slide"
-                          onClick={() => setBannerIndex((i) => (i + 1) % BANNER_SLIDES.length)}
-                          className="w-10 h-10 rounded-xl border-[1.5px] border-[#111111] bg-white hover:bg-[#C7F000] flex items-center justify-center cursor-pointer"
-                        >
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
+              {/* Foreground Hero Content */}
+              <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full">
+                <div className="max-w-2xl">
+                  <p className="text-xs font-mono text-[#C7F000] mb-4">
+                    {currentSlide.kicker}
+                  </p>
+                  <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-semibold leading-[1.04] tracking-tight text-balance text-white">
+                    {currentSlide.title}
+                  </h1>
+                  <p className="mt-5 text-base sm:text-lg text-white/80 max-w-xl leading-relaxed">
+                    {currentSlide.subtitle}
+                  </p>
+                  <p className="mt-4 text-xs font-semibold text-white/90">
+                    Current Offer:{' '}
+                    <span className="bg-[#C7F000] text-[#111111] px-2.5 py-0.5 rounded">
+                      {currentSlide.offer}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Actions + Slide Controls */}
+                <div className="mt-10 pt-8 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setRoute({ page: 'search', category: 'hotels' })}
+                      className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#C7F000] text-[#111111] text-sm font-semibold border border-[#C7F000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#FFFFFF] transition-all cursor-pointer"
+                    >
+                      <span>Explore & Book</span>
+                      <ArrowUpRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRoute({ page: 'info', topic: 'travel-info' })}
+                      className="text-sm font-medium text-white underline underline-offset-4 decoration-white/40 hover:decoration-[#C7F000] transition-colors cursor-pointer"
+                    >
+                      Travel Information
+                    </button>
                   </div>
 
-                  <div className="lg:col-span-6 relative">
-                    <div className="relative h-full min-h-[340px] lg:min-h-[440px] rounded-2xl overflow-hidden border-[1.5px] border-[#111111] shadow-[6px_6px_0px_#111111] bg-[#111111]">
-                      <img
-                        src={currentSlide.image}
-                        alt={currentSlide.title}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between text-xs text-white/90 font-mono">
-                        <span>0{bannerIndex + 1} / 0{BANNER_SLIDES.length}</span>
-                        <span className="text-[#C7F000]">KARNEL VERIFIED</span>
-                      </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 w-32">
+                      {BANNER_SLIDES.map((slide, idx) => (
+                        <button
+                          key={slide.id}
+                          type="button"
+                          onClick={() => setBannerIndex(idx)}
+                          aria-label={`Go to slide ${idx + 1}`}
+                          className="h-1 flex-1 rounded-full bg-white/30 overflow-hidden cursor-pointer"
+                        >
+                          <span
+                            className={`block h-full bg-[#C7F000] transition-all duration-700 ${
+                              idx === bannerIndex ? 'w-full' : idx < bannerIndex ? 'w-full opacity-50' : 'w-0'
+                            }`}
+                          />
+                        </button>
+                      ))}
                     </div>
 
-                    {/* 3D Floating Orbital Sculpture */}
-                    <div className="hidden md:block absolute -bottom-8 -left-10 w-36 h-36 rounded-full bg-[#F5F2EA] border-[1.5px] border-[#111111] shadow-[4px_4px_0px_#111111] overflow-hidden">
-                      <OrbitalCanvas className="w-full h-full" />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label="Previous slide"
+                        onClick={() =>
+                          setBannerIndex((i) => (i - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length)
+                        }
+                        className="w-10 h-10 rounded-xl border border-white/30 bg-black/40 backdrop-blur-sm text-white hover:bg-[#C7F000] hover:text-[#111111] hover:border-[#C7F000] flex items-center justify-center transition-colors cursor-pointer"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Next slide"
+                        onClick={() => setBannerIndex((i) => (i + 1) % BANNER_SLIDES.length)}
+                        className="w-10 h-10 rounded-xl border border-white/30 bg-black/40 backdrop-blur-sm text-white hover:bg-[#C7F000] hover:text-[#111111] hover:border-[#C7F000] flex items-center justify-center transition-colors cursor-pointer"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Subtle 3D Floating Orbital Sculpture */}
+              <div className="hidden xl:block absolute right-10 top-32 w-36 h-36 rounded-full bg-[#F5F2EA]/90 backdrop-blur-md border-[1.5px] border-[#111111] shadow-[4px_4px_0px_#C7F000] overflow-hidden z-10">
+                <OrbitalCanvas className="w-full h-full" />
+              </div>
             </section>
+
+            {/* Spacing before AirplaneFlightPath */}
+            <div className="pt-14" />
+
+            {/* Animated Airplane Flight Corridor */}
+            <AirplaneFlightPath />
 
             {/* 2. Our Features */}
             <section className="py-20 bg-white border-y-[1.5px] border-[#111111]">
@@ -359,7 +436,7 @@ export default function App() {
                         </div>
                         <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
                           <span className="font-mono text-xl font-semibold text-[#C7F000] tabular-nums">
-                            ${pkg.price.toLocaleString()}
+                            Rs. {pkg.price.toLocaleString()}
                           </span>
                           <button
                             type="button"
@@ -803,7 +880,7 @@ export default function App() {
                         <div>
                           <p className="text-xs text-[#111111]/60">Estimated Total</p>
                           <p className="font-display text-2xl font-semibold tabular-nums">
-                            ${(bookingTarget.price * Math.max(1, bookGuests)).toLocaleString()}
+                            Rs. {(bookingTarget.price * Math.max(1, bookGuests)).toLocaleString()}
                           </p>
                         </div>
                         <button
@@ -856,8 +933,8 @@ export default function App() {
       <footer className="bg-[#111111] text-white py-12 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <p className="font-display text-xl font-bold tracking-tight">KARNEL TRAVELS</p>
-            <p className="text-xs text-white/55 mt-1">
+            <KarnelLogo variant="dark" />
+            <p className="text-xs text-white/55 mt-2">
               Hotels · Restaurants · Tourist Spots · Resorts · Packages
             </p>
           </div>

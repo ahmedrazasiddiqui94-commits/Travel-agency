@@ -83,8 +83,8 @@ export function AdminDashboard({
           </div>
           <div className="bg-[#C7F000]/35 border-[1.5px] border-[#111111] rounded-2xl p-6">
             <p className="text-xs text-[#111111]/65">Confirmed Revenue</p>
-            <p className="font-display text-4xl font-semibold tabular-nums mt-2">
-              $
+            <p className="font-display text-3xl sm:text-4xl font-semibold tabular-nums mt-2">
+              Rs.{' '}
               {bookings
                 .filter((b) => b.status === 'Confirmed')
                 .reduce((sum, b) => sum + b.totalPrice, 0)
@@ -116,7 +116,7 @@ export function AdminDashboard({
                     {b.itemName} — {b.location}
                   </p>
                   <p className="text-xs text-[#111111]/65 tabular-nums">
-                    {b.checkIn} to {b.checkOut} · {b.guests} guest(s) · ${b.totalPrice}
+                    {b.checkIn} to {b.checkOut} · {b.guests} guest(s) · Rs. {b.totalPrice.toLocaleString()}
                   </p>
                 </div>
 
@@ -174,18 +174,18 @@ export function AdminDashboard({
               />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-xs font-medium text-[#111111]/70 mb-1.5">Location</label>
+              <label className="block text-xs font-medium text-[#111111]/70 mb-1.5">Location (Pakistan)</label>
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Zermatt, Switzerland"
+                placeholder="Hunza, Gilgit-Baltistan"
                 className="w-full px-3 py-2.5 text-sm bg-[#F5F2EA]/60 border border-[#D9D7D0] rounded-xl"
                 required
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-[#111111]/70 mb-1.5">Price ($)</label>
+              <label className="block text-xs font-medium text-[#111111]/70 mb-1.5">Price (Rs.)</label>
               <input
                 type="number"
                 value={price}

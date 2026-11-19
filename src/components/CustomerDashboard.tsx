@@ -183,7 +183,7 @@ export function CustomerDashboard({
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="font-mono text-sm font-semibold tabular-nums">${b.totalPrice}</span>
+                            <span className="font-mono text-sm font-semibold tabular-nums">Rs. {b.totalPrice.toLocaleString()}</span>
                             <span className="text-xs font-semibold text-[#111111]">{b.status}</span>
                           </div>
                         </div>
@@ -227,7 +227,7 @@ export function CustomerDashboard({
 
                         <div className="flex items-center gap-4">
                           <span className="font-mono text-base font-semibold tabular-nums">
-                            ${b.totalPrice}
+                            Rs. {b.totalPrice.toLocaleString()}
                           </span>
                           {b.status !== 'Cancelled' && (
                             <button
